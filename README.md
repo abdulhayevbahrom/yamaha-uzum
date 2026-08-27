@@ -24,6 +24,7 @@ cp .env.example .env
 
 ```env
 MONGO_URI=mongodb://127.0.0.1:27017/yamaha_uzum
+HOST=127.0.0.1
 SOURCE_MONGO_URI=mongodb://127.0.0.1:27017/yamaha
 UZUM_PUBG_SERVICE_IDS=7814652
 UZUM_PUBG_LOGIN=...
@@ -48,6 +49,8 @@ npm run preflight
 Migratsiya:
 
 - Yamaha bazasidagi `UzumPubgPlan` narxi va aktivligini ko'chiradi
+- `UzumPubgPlan` hali yaratilmagan bo'lsa, joriy PUBG `basePrice/isActive`ni bir
+  martalik boshlang'ich Uzum konfiguratsiyasi sifatida oladi
 - mavjud Uzum orderlarini, jumladan yakunlangan va jarayondagi orderlarni ko'chiradi
 - qayta bajarilganda bot orqali keyin o'zgartirilgan sozlamalarni ustidan yozmaydi
 

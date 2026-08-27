@@ -43,10 +43,19 @@ async function migratePlans(sourceDb) {
     sourceDb.collection("uzumpubgplans").find().toArray(),
   ]);
   const plansByCode = new Map(sourcePlans.map((plan) => [normalize(plan.code), plan]));
+  const configs = sourceConfigs.length
+    ? sourceConfigs
+    : sourcePlans
+      .filter((plan) => plan.provider === "gw" && Number(plan.basePrice || 0) > 0)
+      .map((plan) => ({
+        planCode: plan.code,
+        price: plan.basePrice,
+        isActive: plan.isActive,
+      }));
   let migrated = 0;
   let skipped = 0;
 
-  for (const config of sourceConfigs) {
+  for (const config of configs) {
     const plan = plansByCode.get(normalize(config.planCode));
     if (!plan?.providerProductId) {
       skipped += 1;

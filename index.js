@@ -39,8 +39,9 @@ async function start() {
 
   const app = createApp();
   const port = Math.max(1, Number(process.env.PORT || 4100));
-  const server = app.listen(port, () => {
-    console.log(`Yamaha Uzum API port ${port} da ishga tushdi`);
+  const host = String(process.env.HOST || "127.0.0.1").trim();
+  const server = app.listen(port, host, () => {
+    console.log(`Yamaha Uzum API ${host}:${port} da ishga tushdi`);
   });
 
   startCatalogSync();
