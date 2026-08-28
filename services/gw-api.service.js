@@ -134,6 +134,11 @@ async function createOrder(body) {
   return response.data;
 }
 
+async function getBalance() {
+  const response = await createClient().get("/balance");
+  return response.data;
+}
+
 async function getOrder(orderId) {
   const response = await createClient().get(`/orders/${encodeURIComponent(orderId)}`);
   return response.data;
@@ -142,6 +147,7 @@ async function getOrder(orderId) {
 module.exports = {
   getPubgProducts,
   verifyPubgPlayer,
+  getBalance,
   createOrder,
   getOrder,
   isPubgTopup,

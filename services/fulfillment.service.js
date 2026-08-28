@@ -1,6 +1,7 @@
 const crypto = require("node:crypto");
 const UzumOrder = require("../models/uzum-order.model");
 const { createOrder, getOrder } = require("./gw-api.service");
+const { checkGwBalanceAfterSale } = require("./gw-balance-alert.service");
 
 let recoveryTimer = null;
 
@@ -111,7 +112,7 @@ async function applyProviderPayload(order, payload, { isPoll = false } = {}) {
   };
 
   if (classification === "confirmed") {
-    return UzumOrder.findByIdAndUpdate(
+    const confirmed = await UzumOrder.findByIdAndUpdate(
       order._id,
       {
         $set: {
@@ -125,6 +126,17 @@ async function applyProviderPayload(order, payload, { isPoll = false } = {}) {
       },
       { new: true },
     ).lean();
+    const claimed = await UzumOrder.findOneAndUpdate(
+      { _id: order._id, gwBalanceAlertCheckedAt: null },
+      { $set: { gwBalanceAlertCheckedAt: new Date() } },
+      { new: true },
+    ).lean();
+    if (claimed) {
+      void checkGwBalanceAfterSale(order._id).catch((error) => {
+        console.error("Uzum GW balance alert error:", order._id, error.message);
+      });
+    }
+    return confirmed;
   }
 
   if (classification === "failed") {

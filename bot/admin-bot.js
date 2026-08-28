@@ -2,12 +2,14 @@ const { Api, longPoll } = require("node-telegram-bot-api");
 const PubgPlan = require("../models/pubg-plan.model");
 const UzumOrder = require("../models/uzum-order.model");
 const { syncCatalog, isPlanReady } = require("../services/catalog.service");
+const { getBalance } = require("../services/gw-api.service");
 
 const BUTTONS = {
   plans: "PUBG paketlari",
   sync: "GW katalogni yangilash",
   orders: "Oxirgi buyurtmalar",
   status: "Servis holati",
+  balance: "GW balans",
 };
 const PAGE_SIZE = 8;
 
@@ -50,6 +52,7 @@ function menuMarkup() {
     keyboard: [
       [{ text: BUTTONS.plans }, { text: BUTTONS.orders }],
       [{ text: BUTTONS.sync }, { text: BUTTONS.status }],
+      [{ text: BUTTONS.balance }],
     ],
     resize_keyboard: true,
     is_persistent: true,
@@ -294,6 +297,21 @@ async function showStatus(chatId) {
   ].join("\n"));
 }
 
+async function showGwBalance(chatId) {
+  const payload = await getBalance();
+  const balanceUsd = Number(payload?.balanceUsd);
+  if (!payload?.success || !Number.isFinite(balanceUsd)) {
+    throw new Error("GW balans javobi noto'g'ri");
+  }
+  await bot.sendMessage(
+    chatId,
+    `💳 GW balansi: $${balanceUsd.toLocaleString("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })}`,
+  );
+}
+
 async function handleMessage(msg) {
   const chatId = msg.chat?.id;
   const userId = msg.from?.id;
@@ -310,6 +328,9 @@ async function handleMessage(msg) {
   if (text === BUTTONS.sync) return syncFromBot(chatId);
   if (text === BUTTONS.orders) return showOrders(chatId);
   if (text === BUTTONS.status) return showStatus(chatId);
+  if (text === BUTTONS.balance || /^\/balans(?:@\w+)?(?:\s|$)/i.test(text)) {
+    return showGwBalance(chatId);
+  }
   return sendMenu(chatId);
 }
 

@@ -100,6 +100,10 @@ const uzumOrderSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    gwBalanceAlertCheckedAt: {
+      type: Date,
+      default: null,
+    },
     failedAt: {
       type: Date,
       default: null,
